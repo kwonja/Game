@@ -9,6 +9,7 @@ from os import path
 from settings import *
 from sprites import *
 from tilemap import *
+import time
 
 # HUD functions
 def draw_player_health(surf,x,y,pct):
@@ -101,12 +102,12 @@ class Game:
             obj_center=vec(tile_object.x+tile_object.width/2,
                            tile_object.y+tile_object.height/2)
             if tile_object.name=='player':
-                self.player=Player(self,obj_center.x,obj_center.y)
+                self.player=Player(self,obj_center.x,obj_center.y,PLAYER_SPEED1)
             if tile_object.name=='ogre':
                 Mob(self,obj_center.x,obj_center.y,tile_object.name)
             if tile_object.name=='chort' :
                 Mob(self,obj_center.x,obj_center.y,tile_object.name)
-            if tile_object.name in ['boss']:
+            if tile_object.name == in ['boss']:
                 Mob(self,obj_center.x,obj_center.y,tile_object.name)
             if tile_object.name in ['zombie']:
                 Mob(self,obj_center.x,obj_center.y,tile_object.name)
@@ -115,7 +116,11 @@ class Game:
             if tile_object.name=='wall' :
                 Obstacle(self,tile_object.x,tile_object.y
                          ,tile_object.width,tile_object.height)
-            if tile_object.name in ['health']:
+            if tile_object.name in ['health1']:
+                Item(self,obj_center,tile_object.name)
+            if tile_object.name in ['health2']:
+                Item(self,obj_center,tile_object.name)
+            if tile_object.name in ['speed1']:
                 Item(self,obj_center,tile_object.name)
             if tile_object.name in ['mace']:
                 Item(self,obj_center,tile_object.name)
@@ -166,10 +171,24 @@ class Game:
 
 
         for hit in hits:
-            if hit.type=='health' and self.player.health<PLAYER_HEALTH:
+            if hit.type=='health1' and self.player.health<PLAYER_HEALTH:
                 self.effects_sounds['health_up'].play()
                 hit.kill()
-                self.player.add_health(HEALTH_PACK_AMOUNT)
+                self.player.add_health(HEALTH_PACK_AMOUNT1)
+        for hit in hits:
+            if hit.type=='health2' and self.player.health<PLAYER_HEALTH:
+                self.effects_sounds['health_up'].play()
+                hit.kill()
+                self.player.add_health(HEALTH_PACK_AMOUNT2)
+        for hit in hits:
+            if hit.type=='speed1':
+                self.effects_sounds['health_up'].play()
+                hit.kill()
+                self.player.speed=PLAYER_SPEED2
+                seconds=self.clock.tick()/1000.0
+
+
+
         for hit in hits:
             if hit.type=='mace':
                 self.effects_sounds['health_up'].play()
@@ -235,7 +254,7 @@ class Game:
             pg.draw.line(self.screen, LIGHTGREY, (0, y), (WIDTH, y))
 
     def draw(self):
-        pg.display.set_caption("{:.2f}".format(self.clock.get_fps()))
+        #pg.display.set_caption("{:.2f}".format(self.clock.get_fps()))
         # self.screen.fill(BGCOLOR)
         self.screen.blit(self.map_img, self.camera.apply_rect(self.map_rect))
         # self.draw_grid()
@@ -274,9 +293,22 @@ class Game:
     def show_go_screen(self):
         pass
 
+is_paused=False
+
+def toggle_pause():
+    global is_paused
+    if is_paused == True:
+        is_paused = False
+    else:
+        is_paused = True
+
+
 # create the game object
 g = Game()
 g.show_start_screen()
+
+
+
 while True:
     g.new()
     g.run()
