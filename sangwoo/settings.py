@@ -16,7 +16,7 @@ CYAN = (0, 255, 255)
 WIDTH=640
 HEIGHT=480
 FPS=60
-TITLE="Tilemap Demo"
+TITLE="Cave Escape"
 BGCOLOR=BROWN
 
 TILESIZE=16
@@ -24,11 +24,12 @@ GRIDWIDTH=WIDTH/TILESIZE
 GRIDHEIGHT=HEIGHT/TILESIZE
 
 
-
+TIME_LIMIT=7
 
 # Player settings
 PLAYER_HEALTH=100
-PLAYER_SPEED = 230
+PLAYER_SPEED1 = 230
+PLAYER_SPEED2 = 500
 PLAYER_ROT_SPEED = 250
 PLAYER_IMG = 'wizzard_f_idle_anim_f0.png'
 PLAYER_HIT_RECT = pg.Rect(0, 0, 35, 35)
@@ -38,7 +39,7 @@ BARREL_OFFSET=vec(30,10)
 BULLET_IMG='weapon_katana.png'
 WEAPONS={}
 WEAPONS['katana']={'bullet_speed':500,
-                   'bullet_lifetime':1000,
+                   'bullet_lifetime':4000,
                    'rate':230,
                    'kickback':200,
                    'spread':0,
@@ -48,7 +49,7 @@ WEAPONS['katana']={'bullet_speed':500,
                    'bullet_image':'weapon_katana.png'}
 
 WEAPONS['mace']={'bullet_speed':150,
-                   'bullet_lifetime':8000,
+                   'bullet_lifetime':3500,
                    'rate':400,
                    'kickback':250,
                    'spread':3,
@@ -58,7 +59,7 @@ WEAPONS['mace']={'bullet_speed':150,
                    'bullet_image': 'weapon_mace.png'}
 
 WEAPONS['rusty_sword']={'bullet_speed':300,
-                   'bullet_lifetime':8000,
+                   'bullet_lifetime':3000,
                    'rate':200,
                    'kickback':50,
                    'spread':10,
@@ -81,7 +82,7 @@ WEAPONS['spear']={'bullet_speed':700,
 
 WEAPONS['golden_sword']={'bullet_speed':700,
                    'bullet_lifetime':8000,
-                   'rate':10,
+                   'rate':20,
                    'kickback':1,
                    'spread':50,
                    'damage':0.5,
@@ -120,7 +121,7 @@ MOB['imp']={
 
 MOB['zombie']={
     'mob_speeds':50,
-    'mob_health':30,
+    'mob_health':120,
     'hit_rect':pg.Rect(0,0,30,30),
     'mob_damage':60,
     'mob_knockback':100,
@@ -145,16 +146,7 @@ MOB['muddy']={
     'avoid_radius':200
 }
 
-'''
-#MOB_IMG = 'ogre_idle_anim_f1.png'
-MOB_SPEEDS = [150,100,75,125]
-MOB_HEALTH=100
-MOB_HIT_RECT = pg.Rect(0,0,30,30)
-MOB_DAMAGE=10
-MOB_KNOCKBACK=15
-AVOID_RADIUS=50
-#MOB_IMG2='chort_idle_anim_f0.png'
-'''
+
 
 MOB_IMAGES={'ogre': 'ogre_idle_anim_f1.png',
             'chort':'chort_idle_anim_f0.png',
@@ -165,14 +157,18 @@ MOB_IMAGES={'ogre': 'ogre_idle_anim_f1.png',
 }
 
 # Items
-ITEM_IMAGES={'health': 'flask_red.png',
+ITEM_IMAGES={'health1': 'flask_red.png',
+             'health2':'flask_big_red.png',
              'mace':'weapon_mace.png',
              'katana' : 'weapon_katana.png',
              'rusty_sword':'weapon_rusty_sword.png',
              'spear':'weapon_spear.png',
              'golden_sword':'weapon_golden_sword.png',
-             'chest': 'chest_mimic_open_anim_f0.png'}
-HEALTH_PACK_AMOUNT=20
+             'chest': 'chest_mimic_open_anim_f0.png',
+             'speed1': 'flask_blue.png'
+            }
+HEALTH_PACK_AMOUNT1=20
+HEALTH_PACK_AMOUNT2=40
 
 # Sounds #add ogg,wav 파일을 선호
 BG_MUSIC = 'espionage.ogg'
