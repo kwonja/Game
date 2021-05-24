@@ -12,6 +12,7 @@ from tilemap import *
 import time
 
 # HUD functions
+
 def draw_player_health(surf,x,y,pct):
     if pct<0:
         pct=0
@@ -38,15 +39,52 @@ class Game:
         pg.key.set_repeat(500, 100) #꾹누르면 움직이게 하는 코드 (500밀리초동안기다리고,100밀리초동안 반복)
         self.load_data()
 
-
+    def draw_text(self, text, font_name, size, color, x, y, align="nw"):
+        font = pg.font.Font(font_name, size)
+        text_surface = font.render(text, True, color)
+        text_rect = text_surface.get_rect()
+        if align == "nw":
+            text_rect.topleft = (x, y)
+        if align == "ne":
+            text_rect.topright = (x, y)
+        if align == "sw":
+            text_rect.bottomleft = (x, y)
+        if align == "se":
+            text_rect.bottomright = (x, y)
+        if align == "n":
+            text_rect.midtop = (x, y)
+        if align == "s":
+            text_rect.midbottom = (x, y)
+        if align == "e":
+            text_rect.midright = (x, y)
+        if align == "w":
+            text_rect.midleft = (x, y)
+        if align == "center":
+            text_rect.center = (x, y)
+        self.screen.blit(text_surface, text_rect)
 
     def load_data(self):
+        self.check_time1=0      #speed1
+        self.check_time2=0      #speed2
+        self.check_time3=0      #invincible1
+        self.check_time4=0      #invincible2
+        self.check_time5=0      #power_up1
+        self.check_time6=0      #power_up2
+        self.invincible_check1=0
+        self.invincible_check2=0
+        self.power_up1_check1 = 0
+        self.power_up2_check2 = 0
         game_folder=path.dirname(__file__) #현재 main이있는 파일 경로
         img_folder3=path.join(game_folder,'frames')
         map_folder=path.join(game_folder,'maps2')
         snd_folder = path.join(game_folder, 'snd')#add
         pain_folder = path.join(snd_folder, 'pain')#add
         music_folder = path.join(game_folder, 'music') #add
+        img_folder = path.join(game_folder, 'img')
+        self.start_img = pg.image.load(path.join(img_folder, '그림.png'))
+        #start_img = pg.transform.scale(self.start_img, (WIDTH, HEIGHT)) 써도되고 안써도 되고
+        self.title_font = path.join(img_folder, 'ZOMBIE.TTF')
+        self.start_font = path.join(img_folder, 'aa.ttf')
         self.map=TiledMap(path.join(map_folder,'newmap.tmx'))
         self.map_img=self.map.make_map()
         self.map_rect=self.map_img.get_rect()
@@ -107,7 +145,7 @@ class Game:
                 Mob(self,obj_center.x,obj_center.y,tile_object.name)
             if tile_object.name=='chort' :
                 Mob(self,obj_center.x,obj_center.y,tile_object.name)
-            if tile_object.name == in ['boss']:
+            if tile_object.name in ['boss']:
                 Mob(self,obj_center.x,obj_center.y,tile_object.name)
             if tile_object.name in ['zombie']:
                 Mob(self,obj_center.x,obj_center.y,tile_object.name)
@@ -121,6 +159,16 @@ class Game:
             if tile_object.name in ['health2']:
                 Item(self,obj_center,tile_object.name)
             if tile_object.name in ['speed1']:
+                Item(self,obj_center,tile_object.name)
+            if tile_object.name in ['speed2']:
+                Item(self,obj_center,tile_object.name)
+            if tile_object.name in ['invincible1']:
+                Item(self,obj_center,tile_object.name)
+            if tile_object.name in ['invincible2']:
+                Item(self,obj_center,tile_object.name)
+            if tile_object.name in ['power_up1']:
+                Item(self,obj_center,tile_object.name)
+            if tile_object.name in ['power_up2']:
                 Item(self,obj_center,tile_object.name)
             if tile_object.name in ['mace']:
                 Item(self,obj_center,tile_object.name)
@@ -148,6 +196,12 @@ class Game:
             self.events()   #event
             self.update()   #update
             self.draw()     #draw
+            if(len(self.mobs)== 0 ):
+                break;
+        if self.playing == True:
+            return "win"
+        if len(self.mobs) != 0:
+            return "lose"
 
     def quit(self):
         pg.quit()
@@ -155,9 +209,19 @@ class Game:
 
     def update(self):
         # update portion of the game loop
+        self.timer = pg.time.get_ticks()/1000
+        if self.check_time1 !=0:
+            if self.check_time1+SPEED_TIME_LIMIT1<self.timer:
+                self.player.speed=PLAYER_SPEED1
+                self.check_time1=0
+        if self.check_time2 != 0:
+            if self.check_time2 + SPEED_TIME_LIMIT2 < self.timer:
+                self.player.speed = PLAYER_SPEED1
+                self.check_time2=0
         self.all_sprites.update()
         self.camera.update(self.player)
         hits=pg.sprite.spritecollide(self.player,self.items,False)
+        hits2 = pg.sprite.spritecollide(self.player, self.items, False)
 
         for tile_object in self.map.tmxdata.objects:
             obj_center=vec(tile_object.x+tile_object.width/2,
@@ -168,83 +232,138 @@ class Game:
                 self.effects_sounds['health_up'].play()
                 Mob(self, obj_center.x, obj_center.y, 'imp')
                 hit.kill()
-
-
-        for hit in hits:
             if hit.type=='health1' and self.player.health<PLAYER_HEALTH:
                 self.effects_sounds['health_up'].play()
                 hit.kill()
                 self.player.add_health(HEALTH_PACK_AMOUNT1)
-        for hit in hits:
+
             if hit.type=='health2' and self.player.health<PLAYER_HEALTH:
                 self.effects_sounds['health_up'].play()
                 hit.kill()
                 self.player.add_health(HEALTH_PACK_AMOUNT2)
-        for hit in hits:
+
+
             if hit.type=='speed1':
                 self.effects_sounds['health_up'].play()
                 hit.kill()
+                self.check_time1 = self.timer
                 self.player.speed=PLAYER_SPEED2
-                seconds=self.clock.tick()/1000.0
+
+            if hit.type=='speed2':
+                self.effects_sounds['health_up'].play()
+                hit.kill()
+                self.check_time2 = self.timer
+                self.player.speed=PLAYER_SPEED3
+
+            if hit.type=='invincible1':
+                self.effects_sounds['health_up'].play()
+                hit.kill()
+                self.check_time3=self.timer
+                self.invincible_check1 = 1
+
+            if hit.type=='invincible2':
+                self.effects_sounds['health_up'].play()
+                hit.kill()
+                self.check_time4=self.timer
+                self.invincible_check2 = 1
+
+            if hit.type=='power_up1':
+                self.effects_sounds['health_up'].play()
+                hit.kill()
+                self.check_time5=self.timer
+                self.power_up1_check1 = 1
+
+            if hit.type=='power_up2':
+                self.effects_sounds['health_up'].play()
+                hit.kill()
+                self.check_time6=self.timer
+                self.power_up2_check2 = 1
+
+
+
+
+
+
 
 
 
         for hit in hits:
+            game_folder = path.dirname(__file__)  # 현재 main이있는 파일 경로
+            img_folder3 = path.join(game_folder, 'frames')
+
             if hit.type=='mace':
                 self.effects_sounds['health_up'].play()
                 hit.kill()
                 self.player.weapon='mace'
-                game_folder = path.dirname(__file__)  # 현재 main이있는 파일 경로
-                img_folder3 = path.join(game_folder, 'frames')
                 self.bullet_image = pg.image.load(path.join(img_folder3, ITEM_IMAGES['mace'])).convert_alpha()
 
-        for hit in hits:
             if hit.type=='katana':
                 self.effects_sounds['health_up'].play()
                 hit.kill()
                 self.player.weapon='katana'
-                game_folder = path.dirname(__file__)  # 현재 main이있는 파일 경로
-                img_folder3 = path.join(game_folder, 'frames')
                 self.bullet_image = pg.image.load(path.join(img_folder3, ITEM_IMAGES['katana'])).convert_alpha()
-        for hit in hits:
+
             if hit.type=='rusty_sword':
                 self.effects_sounds['health_up'].play()
                 hit.kill()
                 self.player.weapon='rusty_sword'
-                game_folder = path.dirname(__file__)  # 현재 main이있는 파일 경로
-                img_folder3 = path.join(game_folder, 'frames')
                 self.bullet_image = pg.image.load(path.join(img_folder3, ITEM_IMAGES['rusty_sword'])).convert_alpha()
-        for hit in hits:
-            if hit.type=='spear':
-                self.effects_sounds['health_up'].play()
-                hit.kill()
-                self.player.weapon='spear'
-                game_folder = path.dirname(__file__)  # 현재 main이있는 파일 경로
-                img_folder3 = path.join(game_folder, 'frames')
-                self.bullet_image = pg.image.load(path.join(img_folder3, ITEM_IMAGES['spear'])).convert_alpha()
-        for hit in hits:
-            if hit.type=='golden_sword':
-                self.effects_sounds['health_up'].play()
-                hit.kill()
-                self.player.weapon='golden_sword'
-                game_folder = path.dirname(__file__)  # 현재 main이있는 파일 경로
-                img_folder3 = path.join(game_folder, 'frames')
-                self.bullet_image = pg.image.load(path.join(img_folder3, ITEM_IMAGES['golden_sword'])).convert_alpha()
+
+            if hit.type == 'spear':
+                    self.effects_sounds['health_up'].play()
+                    hit.kill()
+                    self.player.weapon = 'spear'
+                    self.bullet_image = pg.image.load(path.join(img_folder3, ITEM_IMAGES['spear'])).convert_alpha()
+            for hit in hits:
+                if hit.type == 'golden_sword':
+                    self.effects_sounds['health_up'].play()
+                    hit.kill()
+                    self.player.weapon = 'golden_sword'
+                    self.bullet_image = pg.image.load(
+                        path.join(img_folder3, ITEM_IMAGES['golden_sword'])).convert_alpha()
+
+
         #mobs hit player
         hits=pg.sprite.spritecollide(self.player,self.mobs,False,collide_hit_rect)
         for hit in hits:
             if random() < 0.7:
                 choice(self.player_hit_sounds).play()
-            self.player.health-=MOB[hit.type]['mob_damage']
+            if self.invincible_check1==0 and self.invincible_check2==0:
+                self.player.health-=MOB[hit.type]['mob_damage']
+            else:
+                if self.check_time3 != 0:
+                    if self.check_time3 + INVINCIBLE_TIME_LIMIT1 < self.timer:
+                        self.player.health-=0
+                        self.invincible_check1 = 0
+                if self.check_time4 != 0:
+                    if self.check_time4 + INVINCIBLE_TIME_LIMIT2 < self.timer:
+                        self.player.health-=0
+                        self.invincible_check2 = 0
             hit.vel=vec(0,0)
             if self.player.health<=0:
                 self.playing=False
             if hits:
                 self.player.pos+=vec(MOB[hit.type]['mob_knockback'],0).rotate(-hits[0].rot)
+
         #bullets hit mobs
         hits=pg.sprite.groupcollide(self.mobs,self.bullets,False,True)
         for hit in hits:
-            hit.health-=WEAPONS[self.player.weapon]['damage'] * len(hits[hit])
+            if self.power_up1_check1==0 :
+                hit.health-=WEAPONS[self.player.weapon]['damage']*len(hits[hit])
+            if self.power_up2_check2==0:
+                hit.health -= WEAPONS[self.player.weapon]['damage'] * len(hits[hit])
+
+            else:
+                if self.check_time5 != 0:
+                    if self.check_time5 + POWER_UP_TIME1 > self.timer:
+                        hit.health -= (WEAPONS[self.player.weapon]['damage']*1.5) * len(hits[hit])
+                    else:
+                        self.power_up1_check1 = 0
+                if self.check_time6 != 0:
+                    if self.check_time6 + POWER_UP_TIME2 > self.timer:
+                        hit.health -= (WEAPONS[self.player.weapon]['damage'] * 1.5) * len(hits[hit])
+                    else:
+                        self.power_up1_check1 = 0
             hit.vel=vec(0,0)
 
     def draw_grid(self):
@@ -267,6 +386,8 @@ class Game:
         if self.draw_debug:
             for wall in self.walls:
                 pg.draw.rect(self.screen, CYAN, self.camera.apply_rect(wall.rect), 1)
+        self.draw_text('Mobs : {}'.format(len(self.mobs)), self.start_font, 30, RED,
+                       WIDTH - 20, 10, align="ne")
 
         # pg.draw.rect(self.screen, WHITE, self.player.hit_rect, 2)
         # HUD functions
@@ -288,10 +409,52 @@ class Game:
 
 
     def show_start_screen(self):
-        pass
+        self.screen.blit(self.start_img, [0, 0])
+        self.draw_text("STAGE 1", self.start_font, 50, RED,
+                       WIDTH / 2, HEIGHT - HEIGHT * 3 / 4, align="center")
+        self.draw_text("START : any key press", self.start_font, 25, WHITE,
+                       WIDTH / 2, HEIGHT - HEIGHT * 1 / 2, align="center")
+        self.draw_text("ESCAPE : press ESC", self.start_font, 25, WHITE,
+                       WIDTH / 2, HEIGHT - HEIGHT * 1.3 / 3, align="center")
+        pg.display.flip()
+        self.wait_for_key()
 
-    def show_go_screen(self):
-        pass
+    def show_rego_screen(self):
+        self.screen.fill(BLACK)
+        self.draw_text("GAME OVER", self.title_font, 50, RED,
+                       WIDTH / 2, HEIGHT / 2, align="center")
+        self.draw_text("if you want to REPLAY press UP-KEY", self.title_font, 25, WHITE,
+                       WIDTH / 2, HEIGHT * 3 / 4, align="center")
+        self.draw_text("if you want to EXIT press ESC", self.title_font, 25, WHITE,
+                       WIDTH / 2, HEIGHT * 5 / 6, align="center")
+        pg.display.flip()
+        self.wait_for_key()
+    def show_end_screen(self):
+        self.screen.fill(BLACK)
+        self.draw_text("YOU WIN", self.title_font, 50, RED,
+                       WIDTH / 2, HEIGHT / 2, align="center")
+        self.draw_text("if you want to REPLAY press UP-KEY", self.title_font, 25, WHITE,
+                       WIDTH / 2, HEIGHT * 3 / 4, align="center")
+        self.draw_text("if you want to EXIT press ESC", self.title_font, 25, WHITE,
+                       WIDTH / 2, HEIGHT * 5 / 6, align="center")
+        pg.display.flip()
+        self.wait_for_key()
+
+    def wait_for_key(self):
+        pg.event.wait()
+        waiting = True
+        while waiting:
+            self.clock.tick(FPS)
+            for event in pg.event.get():
+                if event.type == pg.KEYDOWN:
+                    if event.key == pg.K_ESCAPE:
+                        waiting = False
+                        self.quit()
+                    else:
+                        waiting = False
+                if event.type == pg.QUIT:
+                    waiting = False
+                    self.quit()
 
 is_paused=False
 
@@ -306,10 +469,15 @@ def toggle_pause():
 # create the game object
 g = Game()
 g.show_start_screen()
-
-
+g.effects_sounds['level_start'].play()
 
 while True:
     g.new()
-    g.run()
-    g.show_go_screen()
+    result = g.run()
+
+
+    if result == "lose":
+        g.show_rego_screen()
+
+    if result == "win":
+        g.show_end_screen()
