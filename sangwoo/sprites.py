@@ -26,10 +26,11 @@ def collide_with_walls(sprite, group, dir):
             sprite.hit_rect.centery = sprite.pos.y
 
 class Player(pg.sprite.Sprite):
-    def __init__(self, game, x, y):
+    def __init__(self, game, x, y,speed):
         self.groups = game.all_sprites
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
+        self.speed=speed
         self.image = game.player_img
         self.rect = self.image.get_rect()
         self.hit_rect = PLAYER_HIT_RECT
@@ -54,16 +55,16 @@ class Player(pg.sprite.Sprite):
         self.angle = pg.math.Vector2(mouse_pos - player_center).angle_to(center)
         if (self.angle < 0):
             self.angle = 360 + self.angle
-        print(self.angle)
+        #print(self.angle)
 
         if keys[pg.K_LEFT] or keys[pg.K_a]:
-            self.vel = vec(-PLAYER_SPEED,0 )
+            self.vel = vec(-self.speed,0 )
         if keys[pg.K_RIGHT] or keys[pg.K_d]:
-            self.vel = vec(PLAYER_SPEED,0 )
+            self.vel = vec(self.speed,0 )
         if keys[pg.K_UP] or keys[pg.K_w]:
-            self.vel = vec(0, -PLAYER_SPEED)
+            self.vel = vec(0, -self.speed)
         if keys[pg.K_DOWN] or keys[pg.K_s]:
-            self.vel = vec(0, PLAYER_SPEED)
+            self.vel = vec(0, self.speed)
 
         if keys[pg.K_SPACE]or mouse[0]:
             self.game.weapon_sounds['gun'].play()
