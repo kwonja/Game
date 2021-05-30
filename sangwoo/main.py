@@ -82,7 +82,6 @@ class Game:
         music_folder = path.join(game_folder, 'music') #add
         img_folder = path.join(game_folder, 'img')
         self.start_img = pg.image.load(path.join(img_folder, '그림.png'))
-        #start_img = pg.transform.scale(self.start_img, (WIDTH, HEIGHT)) 써도되고 안써도 되고
         self.title_font = path.join(img_folder, 'ZOMBIE.TTF')
         self.start_font = path.join(img_folder, 'aa.ttf')
         self.map=TiledMap(path.join(map_folder,'newmap.tmx'))
@@ -120,7 +119,7 @@ class Game:
         self.weapon_sounds = {}
         for snd in WEAPON_SOUNDS_GUN:
             s = pg.mixer.Sound(path.join(snd_folder, WEAPON_SOUNDS_GUN[snd]))
-            s.set_volume(0.05)
+            s.set_volume(0.2)
             self.weapon_sounds[snd] = s
         self.player_hit_sounds = []
         for player in PLAYER_HIT_SOUNDS:
@@ -348,6 +347,8 @@ class Game:
         #bullets hit mobs
         hits=pg.sprite.groupcollide(self.mobs,self.bullets,False,True)
         for hit in hits:
+            if(hit.health>0):
+               self.weapon_sounds['gun'].play()
             if self.power_up1_check1==0 :
                 hit.health-=WEAPONS[self.player.weapon]['damage']*len(hits[hit])
             if self.power_up2_check2==0:
@@ -410,7 +411,7 @@ class Game:
 
     def show_start_screen(self):
         self.screen.blit(self.start_img, [0, 0])
-        self.draw_text("STAGE 1", self.start_font, 50, RED,
+        self.draw_text("ESCAPE CAVE", self.start_font, 50, RED,
                        WIDTH / 2, HEIGHT - HEIGHT * 3 / 4, align="center")
         self.draw_text("START : any key press", self.start_font, 25, WHITE,
                        WIDTH / 2, HEIGHT - HEIGHT * 1 / 2, align="center")
@@ -474,10 +475,7 @@ g.effects_sounds['level_start'].play()
 while True:
     g.new()
     result = g.run()
-
-
     if result == "lose":
         g.show_rego_screen()
-
     if result == "win":
         g.show_end_screen()
