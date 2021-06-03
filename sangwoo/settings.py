@@ -182,8 +182,6 @@ HEALTH_PACK_AMOUNT2 = 40
 # Sounds #add ogg,wav 파일을 선호
 BG_MUSIC = 'backgroundmusic.ogg'
 PLAYER_HIT_SOUNDS = ['pain8.wav', 'pain9.wav', 'pain10.wav', 'pain11.wav']
-ZOMBIE_MOAN_SOUNDS = ['brains2.wav', 'brains3.wav', 'zombie-roar-1.wav', 'zombie-roar-2.wav',
-                      'zombie-roar-3.wav', 'zombie-roar-5.wav', 'zombie-roar-6.wav', 'zombie-roar-7.wav']
 ZOMBIE_HIT_SOUNDS = ['splat-15.wav']
 WEAPON_SOUNDS_GUN = {'gun': 'sfx_weapon_singleshot2.wav', 'attack': 'shout_effect.mp3'}
 EFFECTS_SOUNDS = {'level_start': 'level_start.wav',
